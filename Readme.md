@@ -1,7 +1,7 @@
 # Личный проект «Шесть городов»
 
-* Студент: [Михаил Беспятов](https://up.htmlacademy.ru/nodejs-api-individual/2/user/1501539).
-* Наставник: `Неизвестно`.
+- Студент: [Михаил Беспятов](https://up.htmlacademy.ru/nodejs-api-individual/2/user/1501539).
+- Наставник: `Евгений Наумов`.
 
 ---
 
