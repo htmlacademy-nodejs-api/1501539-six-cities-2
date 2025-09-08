@@ -64,7 +64,7 @@ export class ImportCommand implements Command {
       });
   }
 
-  public execute(...parameters: string[]): void {
+  public async execute(...parameters: string[]): Promise<void> {
     const [tsvFilePath] = parameters;
     try {
       const offers: Offer[] = this.getOffers(tsvFilePath);

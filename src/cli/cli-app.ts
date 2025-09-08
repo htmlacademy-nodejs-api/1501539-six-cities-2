@@ -18,11 +18,11 @@ export class CliApp {
     return this.commands[commandName] ?? this.commands[this.defaultCommandName];
   }
 
-  public processCommand(cliArguments: string[]) {
+  public async processCommand(cliArguments: string[]) {
     const parsedCommand = CommandParser.parse(cliArguments);
     const [commandName] = Object.keys(parsedCommand);
     const command = this.getCommand(commandName);
     const commandArguments = parsedCommand[commandName] ?? [];
-    command.execute(...commandArguments);
+    await command.execute(...commandArguments);
   }
 }

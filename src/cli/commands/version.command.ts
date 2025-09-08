@@ -26,7 +26,7 @@ export class VersionCommand implements Command {
     }
   }
 
-  public execute(..._parameters: string[]): void {
+module1-task2  public async execute(..._parameters: string[]): Promise<void> {
     const version = this.getVersion();
     console.log(chalk.blue(version));
   }
