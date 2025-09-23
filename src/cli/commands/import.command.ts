@@ -1,76 +1,32 @@
-import { readFileSync } from 'node:fs';
 import { Command } from './command.interface.js';
-import { resolve } from 'node:path';
-import { Offer, OfferConvenience, OfferType } from '../../shared/types/offer.interface.js';
-import { UserType } from '../../shared/types/user.interface.js';
-import chalk from 'chalk';
-
-const stringToBoolean = (str: string): boolean => str === 'true';
+import { getErrorMessage, tsvRowToOffer } from '../../shared/helpers/index.js';
+import { TSVFileReader, TSVFileReaderEvents } from '../../shared/libs/file-reader/index.js';
 
 export class ImportCommand implements Command {
   public getName() {
     return '--import';
   }
 
-  private getOffers(tsvFilePath: string) {
-    return readFileSync(resolve(tsvFilePath), 'utf-8')
-      .split('\n')
-      .filter((item) => item !== '')
-      .map((offer) => {
-        const [
-          name,
-          description,
-          datePublished,
-          city,
-          previewImage,
-          images,
-          isPremium,
-          isFavorite,
-          rating,
-          type,
-          roomsNumber,
-          guestNumber,
-          price,
-          convenience,
-          author,
-          coordinates
-        ] = offer.split('\t');
-        const [userName, email, avatar, password, userType] = author.split(',');
-        const [latitude, longitude] = coordinates.split(',');
-        return {
-          name,
-          description,
-          datePublished,
-          city,
-          previewImage,
-          images: images.split(','),
-          isPremium: stringToBoolean(isPremium),
-          isFavorite: stringToBoolean(isFavorite),
-          rating: Number(rating),
-          type: type as OfferType,
-          roomsNumber: Number(roomsNumber),
-          guestNumber: Number(guestNumber),
-          price: Number(price),
-          convenience: convenience.split(',') as OfferConvenience[],
-          author: {
-            name: userName,
-            email,
-            avatar,
-            password,
-            type: userType as UserType,
-          },
-          coordinates: {latitude: Number(latitude), longitude: Number(longitude)}
-        };
-      });
+  private onImportedLine(row:string) {
+    const offer = tsvRowToOffer(row);
+    console.log(offer);
+  }
+
+  private onCompleteImport(count: number) {
+    console.info(`${count} rows imported.`);
   }
 
   public async execute(...parameters: string[]): Promise<void> {
     const [tsvFilePath] = parameters;
+    const fileReader = new TSVFileReader(tsvFilePath.trim());
+
+    fileReader.on(TSVFileReaderEvents.LINE, this.onImportedLine);
+    fileReader.on(TSVFileReaderEvents.END, this.onCompleteImport);
     try {
-      const offers: Offer[] = this.getOffers(tsvFilePath);
-      console.log(chalk.yellow(JSON.stringify(offers)));
-    } catch {
-      throw new Error('Invalid file type');
+      await fileReader.read();
+    } catch (error) {
+      console.error(`Can't import data from file: ${tsvFilePath}`);
+      console.error(getErrorMessage(error));
     }
   }
 }
