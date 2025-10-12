@@ -1,8 +1,10 @@
+import { injectable } from 'inversify';
 import { CommandParser } from './command-parser.js';
 import { Command } from './commands/command.interface.js';
 
 type Commands = Record<string, Command>
 
+@injectable()
 export class CliApp {
   private readonly defaultCommandName = '--help';
   public commands: Commands = {};

@@ -38,10 +38,10 @@ export const getMockOffer = (data: MockData): Offer => {
     description: getRandomItem(descriptions),
     datePublished: dayjs()
       .subtract(generateRandomValue(WeekDay.FIRST, WeekDay.LAST), 'day')
-      .toISOString(),
+      .toDate(),
     city,
     previewImage: getRandomItem(previewImages),
-    images: getRandomItems(images),
+    images,
     isPremium: getRandomItem(isPremium),
     isFavorite: getRandomItem(isFavorite),
     rating: generateRandomValue(Rating.MIN, Rating.MAX),

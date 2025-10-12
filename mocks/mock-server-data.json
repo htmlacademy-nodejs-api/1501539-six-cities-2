@@ -1,7 +1,7 @@
 {
   "api": {
     "names": ["Студия в центре", "Загородный дом", "Просторная трешка", "Бабушкина двушка", "Дом у озера", "Президентский люкс"],
-    "descriptions": ["Для студентов", "Семье", "Прекрасный вид", "Свежий воздух", "С видом на стройку"],
+    "descriptions": ["Для студентов проживающих без животных, не больше трех", "Семье с небольшим количеством детей, без животных или с ними", "Очень прекрасный вид на озеро и лес, вдохновляет", "Свежий воздух как на альпийских лугах, свалка рядом не мешает", "С видом на стройку, но обещают достроить вот уже 15 лет как ждем"],
     "cities": ["Paris", "Cologne", "Brussels", "Amsterdam", "Hamburg", "Dusseldorf"],
     "previewImages": ["https://preview.com/image-1.jpg", "https://preview.com/image-2.jpg", "https://preview.com/image-3.jpg", "https://preview.com/image-4.jpg", "https://preview.com/image-5.jpg", "https://preview.com/image-6.jpg"],
     "images": ["https://images.com/image-1.jpg", "https://images.com/image-2.jpg", "https://images.com/image-3.jpg", "https://images.com/image-4.jpg", "https://images.com/image-5.jpg", "https://images.com/image-6.jpg"],
@@ -13,21 +13,18 @@
       "name": "Вячеслав",
       "email": "test@mail.ru",
       "avatar": "http://avatars.com/avatar1.jpg",
-      "password": "123456789",
       "type": "default"
     },
     {
       "name": "Дэвид Бэкхам",
       "email": "d_b_official@gmail.com",
       "avatar": "http://avatars.com/d_b.jpg",
-      "password": "987654321",
       "type": "pro"
     },
     {
       "name": "Алиса",
       "email": "aly@mail.ru",
       "avatar": "http://avatars.com/aly.jpg",
-      "password": "qwerty",
       "type": "pro"
     }]
   }
