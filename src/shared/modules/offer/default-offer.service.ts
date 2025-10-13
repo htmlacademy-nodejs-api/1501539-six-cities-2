@@ -20,7 +20,7 @@ export class DefaultOfferService implements OfferService {
     return result as unknown as Promise<DocumentType<OfferEntity>>;
   }
 
-  public async findById(id: string): Promise<DocumentType<OfferEntity>> | null {
+  public async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     return this.offerModel.findById(id).exec();

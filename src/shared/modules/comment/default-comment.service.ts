@@ -13,26 +13,26 @@ export class DefaultCommentService implements CommentService {
     @inject(Component.CommentModule) private readonly commentModule: types.ModelType<CommentEntity>
   ) {}
 
-  public async create(dto: CreateCommentDto) {
+  public async create(dto: CreateCommentDto): Promise<DocumentType<CommentEntity>> {
     const result = await this.commentModule.create(dto);
     this.logger.info(`New comment created: ${result.id}`);
 
     return result;
   }
 
-  public async findById(id: string): Promise<DocumentType<CommentEntity>> | null {
+  public async findById(id: string): Promise<DocumentType<CommentEntity> | null> {
     return this.commentModule.findById(id).exec();
   }
 
-  public async findByAuthorId(authorId: string): Promise<DocumentType<CommentEntity>[] | []> {
+  public async findByAuthorId(authorId: string): Promise<DocumentType<CommentEntity>[]> {
     return this.commentModule.find({authorId}).exec();
   }
 
-  public async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[] | []> {
+  public async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[]> {
     return this.commentModule.find({offerId}).exec();
   }
 
-  public async findByRating(rating: number): Promise<DocumentType<CommentEntity>[] | []> {
+  public async findByRating(rating: number): Promise<DocumentType<CommentEntity>[]> {
     return this.commentModule.find({rating}).exec();
   }
 }

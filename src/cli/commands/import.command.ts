@@ -99,13 +99,13 @@ export class ImportCommand implements Command {
     const fileReader = new TSVFileReader(tsvFilePath.trim());
 
     fileReader.on(TSVFileReaderEvents.LINE, (row, resolve) => this.onImportedLine(row, resolve));
-    fileReader.on(TSVFileReaderEvents.END, this.onCompleteImport);
+    fileReader.on(TSVFileReaderEvents.END, (count) => this.onCompleteImport(count));
     try {
       await fileReader.read();
     } catch (error) {
       this.logger.error(`Can't import data from file: ${tsvFilePath}`);
       this.logger.error(getErrorMessage(error));
-      this.databaseClient.disconnect();
+      await this.databaseClient.disconnect();
     }
   }
 }

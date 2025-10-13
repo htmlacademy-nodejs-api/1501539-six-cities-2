@@ -15,19 +15,19 @@ export interface CommentEntity extends defaultClasses.Base {}
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class CommentEntity extends defaultClasses.TimeStamps {
   @prop({ required, minlength: [5, 'Min length for text 5'], maxlength: [1024, 'Max length for text 1024'] })
-  public text: string;
+  public text!: string;
 
   @prop({ required })
-  public datePublished: Date;
+  public datePublished!: Date;
 
   @prop({ required, min: [1, 'Min rating 1'], max: [5, 'Max rating 5'] })
-  public rating: number;
+  public rating!: number;
 
   @prop({ ref: UserEntity, required })
-  public authorId: Ref<UserEntity>;
+  public authorId!: Ref<UserEntity>;
 
   @prop({ ref: OfferEntity, required })
-  public offerId: Ref<OfferEntity>;
+  public offerId!: Ref<OfferEntity>;
 }
 
 export const CommentModule = getModelForClass(CommentEntity);

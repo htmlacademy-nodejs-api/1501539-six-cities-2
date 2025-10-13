@@ -9,10 +9,10 @@ const IMAGES_MAX_LENGTH = 6;
 
 class Coordinates {
   @prop({ required })
-  public latitude: number;
+  public latitude!: number;
 
   @prop({ required })
-  public longitude: number;
+  public longitude!: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -31,7 +31,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
     minlength: [10, 'Min length for name 10'],
     maxlength: [100, 'Max length for name 100']
   })
-  public name: string;
+  public name!: string;
 
   @prop({
     trim,
@@ -39,20 +39,20 @@ export class OfferEntity extends defaultClasses.TimeStamps {
     minlength: [20, 'Min length for description 20'],
     maxlength: [1024, 'Max length for description 1024']
   })
-  public description: string;
+  public description!: string;
 
   @prop({ required })
-  public datePublished: Date;
+  public datePublished!: Date;
 
   @prop({
     required,
     enum: CitiesName,
     type: () => String
   })
-  public city: string;
+  public city!: string;
 
   @prop({ required })
-  public previewImage: string;
+  public previewImage!: string;
 
   @prop({
     required,
@@ -62,66 +62,66 @@ export class OfferEntity extends defaultClasses.TimeStamps {
       message: 'Images list length can be only 6'
     },
   })
-  public images: string[];
+  public images!: string[];
 
   @prop({ required })
-  public isPremium: boolean;
+  public isPremium!: boolean;
 
   @prop({ required })
-  public isFavorite: boolean;
+  public isFavorite!: boolean;
 
   @prop({
     min: [1, 'Min rating 1'],
     max: [5, 'Max rating 5']
   })
-  public rating: number;
+  public rating!: number;
 
   @prop({
     type: () => String,
     enum: OfferType,
     required
   })
-  public type: OfferType;
+  public type!: OfferType;
 
   @prop({
     required,
     min: [1, 'Min rooms 1'],
     max: [8, 'Max rooms 8']
   })
-  public roomsNumber: number;
+  public roomsNumber!: number;
 
   @prop({
     required,
     min: [1, 'Min guests 1'],
     max: [10, 'Max gooests 10']
   })
-  public guestNumber: number;
+  public guestNumber!: number;
 
   @prop({
     required,
     min: [100, 'Min price 100'],
     max: [100000, 'Max price 100 000']
   })
-  public price: number;
+  public price!: number;
 
   @prop({
     required,
     type: () => [String],
     enum: OfferConvenience
   })
-  public convenience: OfferConvenience[];
+  public convenience!: OfferConvenience[];
 
   @prop({
     ref: UserEntity,
     required
   })
-  public authorId: Ref<UserEntity>;
+  public authorId!: Ref<UserEntity>;
 
   @prop()
-  public commentsNumber: number;
+  public commentsNumber!: number;
 
   @prop({ required, _id: false })
-  public coordinates: Coordinates;
+  public coordinates!: Coordinates;
 }
 
 export const OfferModel = getModelForClass(OfferEntity);
