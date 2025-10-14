@@ -21,7 +21,7 @@ export enum OfferConvenience {
 export interface Offer {
   name: string;
   description: string;
-  datePublished: string;
+  datePublished: Date;
   city: string;
   previewImage: string;
   images: string[];

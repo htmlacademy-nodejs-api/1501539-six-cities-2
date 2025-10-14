@@ -22,12 +22,12 @@ export const tsvRowToOffer = (row: string): Offer => {
     author,
     coordinates
   ] = row.split('\t');
-  const [userName, email, avatar, password, userType] = author.split(',');
+  const [userName, email, avatar, userType] = author.split(',');
   const [latitude, longitude] = coordinates.split(',');
   return {
     name,
     description,
-    datePublished,
+    datePublished: new Date(datePublished),
     city,
     previewImage,
     images: images.split(','),
@@ -43,7 +43,6 @@ export const tsvRowToOffer = (row: string): Offer => {
       name: userName,
       email,
       avatar,
-      password,
       type: userType as UserType,
     },
     coordinates: {latitude: Number(latitude), longitude: Number(longitude)}
