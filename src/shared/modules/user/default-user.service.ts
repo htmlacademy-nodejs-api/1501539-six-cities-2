@@ -19,7 +19,7 @@ export class DefaultUserService implements UserService {
     const result = this.userModel.create(user);
     this.logger.info(`New user created: ${user.email}`);
 
-    return result as unknown as Promise<DocumentType<UserEntity>>;
+    return result;
   }
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {

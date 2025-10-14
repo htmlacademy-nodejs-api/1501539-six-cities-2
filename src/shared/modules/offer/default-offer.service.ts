@@ -17,12 +17,10 @@ export class DefaultOfferService implements OfferService {
     const result = await this.offerModel.create(dto);
     this.logger.info(`New offer created, offerId: ${result.name}`);
 
-    return result as unknown as Promise<DocumentType<OfferEntity>>;
+    return result;
   }
 
   public async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     return this.offerModel.findById(id).exec();
   }
 }
