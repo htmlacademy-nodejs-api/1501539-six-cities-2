@@ -17,22 +17,22 @@ export class DefaultCommentService implements CommentService {
     const result = await this.commentModule.create(dto);
     this.logger.info(`New comment created: ${result.id}`);
 
-    return result;
+    return result.populate('authorId');
   }
 
   public async findById(id: string): Promise<DocumentType<CommentEntity> | null> {
-    return this.commentModule.findById(id).exec();
+    return this.commentModule.findById(id).populate('authorId').exec();
   }
 
   public async findByAuthorId(authorId: string): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({authorId}).exec();
+    return this.commentModule.find({authorId}).populate('authorId').exec();
   }
 
   public async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({offerId}).exec();
+    return this.commentModule.find({offerId}).populate('authorId').exec();
   }
 
   public async findByRating(rating: number): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({rating}).exec();
+    return this.commentModule.find({rating}).populate('authorId').exec();
   }
 }
