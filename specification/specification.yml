@@ -1,0 +1,1042 @@
+openapi: 3.1.0
+info:
+  title: API сервер для личного проекта "Шесть городов"
+  description: |-
+    * Список ресурсов и маршрутов сервера "Шесть городов"
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+tags:
+  - name: offers
+    description: Действия с предложениями
+  - name: users
+    description: Действия с пользователями
+  - name: comments
+    description: Действия с комментариями
+
+paths:
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя
+
+      requestBody:
+        description: Информация для создания нового пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createUser'
+        required: true
+
+      responses:
+        "201":
+          description: Пользователь зарегистрирован. Объект пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        "400":
+          description: Данные клиента не прошли валидацию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Некорректный формат email'
+                code: 'INVALID_EMAIL'
+
+        "409":
+          description: Пользователь с таким email уже существует.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь с таким email уже существует'
+                code: 'DUPLICATED_EMAIL'
+
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Авторизация пользователя
+      description: Авторизует пользователя на основе логина и пароля
+
+      requestBody:
+        description: Информация для авторизации пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userLogin'
+        required: true
+
+      responses:
+        "200":
+          description: Пользователь успешно авторизован.
+          content:
+            application/json:
+              schema:
+                type: object
+
+                properties:
+                  authToken:
+                    type: string
+                    example: Bearer token
+
+        "400":
+          description: Отсутствуют обязательные поля (логин или пароль).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Неверный пароль'
+                code: 'INVALID_PASSWORD'
+
+    get:
+      tags:
+        - users
+      summary: Проверка состояния пользователя
+      description: Возвращает информацию по авторизованному пользователю
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      responses:
+        "200":
+          description: Пользователь успешно авторизован
+          content:
+            application/json:
+              schema:
+                type: object
+
+                properties:
+                  authorized:
+                    type: boolean
+                    example: true
+
+        "400":
+          description: Пользователь с таким id не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: Невалидный токен
+                code: 'INVALID_TOKEN'
+
+  /users/logout:
+    post:
+      tags:
+        - users
+      summary: Завершение сессии авторизации
+      description: Пользователь завершает сессии авторизации
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      responses:
+        "200":
+          description: Пользователь успешно завершил сеанс
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+  /users/{userId}/avatar:
+    post:
+      tags:
+        - users
+      summary: Загрузить изображение аватара
+      description: Загружает изображение аватара пользователя. Изображение аватара должно быть в формате `png` или `jpg`
+
+      requestBody:
+        description: Файл для загрузки аватара
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Файл изображения в формате `png` или `jpg`
+            encoding:
+              image:
+                contentType: image/png, image/jpeg
+
+      responses:
+        '200':
+          description: Изображение успешно загружено
+
+  /offers/create:
+    post:
+      tags:
+        - offers
+      summary: Создание нового предложения по аренде
+      description: Создает предложение по аренде
+
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      requestBody:
+        description: Данные для создания предложения
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createOffer'
+
+      responses:
+        "201":
+          description: Предложение успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Ошибка при отправке данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Название должно содержать от 10 до 100 символов'
+                code: 'INVALID_NAME_LENGTH'
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+  /offers:
+    get:
+      tags:
+        - offers
+      summary: Получение списка предложений по аренде
+      description: Позволяет получить список предложений по аренде
+
+      parameters:
+        - $ref: '#/components/parameters/limit'
+
+      responses:
+        "200":
+          description: Список предложений по аренде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerList'
+
+  /offers/{id}:
+    get:
+      tags:
+        - offers
+      summary: Детальная информация по предложению по аренде
+      description: Отдает детальную информацию по предложению
+
+      responses:
+        "200":
+          description: Детальная информация по предложению
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+    patch:
+      tags:
+        - offers
+      summary: Редактирование предложения по аренде
+      description: Редактирует предложение по аренде
+
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      requestBody:
+        description: Данные для обновления объявления
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateOffer'
+
+      responses:
+        "200":
+          description: Предложение успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Неверно переданы данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: "Предложение может менять только автор"
+                code: "INVALID_AUTHOR_ID"
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+    delete:
+      tags:
+        - offers
+      summary: Удаление предложения по аренде
+      description: Удаляет предложение по аренде
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      responses:
+        "200":
+          description: Предложение успешно обновлено
+
+        "400":
+          description: Неверно переданы данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: "Предложение может менять только автор"
+                code: "INVALID_AUTHOR_ID"
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+  /offers/premium:
+    get:
+      tags:
+        - offers
+      summary: Премиальные предложения по городу
+      description: Получение премиальных предложений по городу (не больше 3)
+
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+            example: Cologne
+
+      responses:
+        "200":
+          description: Успешно получены предложения по аренде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerList'
+
+  /offers/favorite:
+    get:
+      tags:
+        - offers
+      summary: Получение избранных предложений по аренде
+      description: Получение избранных предложений пользователя
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      responses:
+        "200":
+          description: Успешно получены избранные предложения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerList'
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+    post:
+      tags:
+        - offers
+      summary: Добавление и удаление предложения в/из избранного
+      description: Добавляет и удаляет предложение в/из избраного
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      requestBody:
+        description: Данные для добавления или удаления предложения в/из избранного
+        content:
+          application/json:
+            schema:
+              type: object
+
+              properties:
+                offerId:
+                  type: string
+                  example: 6329c3d6a04ab1061c6425ea
+
+      responses:
+        "200":
+          description: Успешное добавление или удаление предложения в/из избранного
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+  /comments/create:
+    post:
+      tags:
+        - comments
+      summary: Создание нового комментария
+      description: Создает новый комментарий
+
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeader'
+
+      requestBody:
+        description: Данные для создания нового комментария
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createComment'
+
+      responses:
+        "200":
+          description: Комментарий успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+        "400":
+          description: Неверно переданы данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: "Текст должен быть не менее 5 символов"
+                code: "INVALID_TEXT_MINIMUM_LENGTH"
+
+        "401":
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Пользователь не авторизован'
+                example: 'USER_NOT_AUTHORIZED'
+
+  /comments:
+    get:
+      tags:
+        - comments
+      summary: Список комментариев для предложения
+      description: Получение списка комментариев
+
+      parameters:
+        - name: offerId
+          in: query
+          required: true
+          schema:
+            type: string
+            example: 6329c3d6a04ab1061c6425ea
+
+      responses:
+        "200":
+          description: Комментарии успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+components:
+  parameters:
+    AuthorizationHeader:
+      name: Authorization
+      in: header
+      required: true
+      description: JWT токен для аутентификации
+      schema:
+        type: string
+        pattern: '^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$'
+        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 60
+        default: 20
+      description: Количество записей
+
+  schemas:
+    error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Описание ошибки
+
+        code:
+          type: string
+          description: Код ошибки
+
+    createUser:
+      type: object
+
+      properties:
+        email:
+          type: string
+          pattern: '/^([\w-\\.]+@([\w-]+\.)+[\w-]{2,4})?$/'
+          example: qwerty@gmail.com
+
+        avatar:
+          type: string
+          pattern: '^.*\.(jpg|jpeg|png)$'
+          example: http://avatars.com/avatar1.jpg
+
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+          example: Иван
+
+        type:
+          type: string
+          items:
+            type: string
+            enum:
+              - pro
+              - default
+          example: pro
+
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+          example: qwerty123
+
+    user:
+      type: object
+
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        email:
+          type: string
+          example: qwerty@gmail.com
+
+        avatar:
+          type: string
+          example: http://avatars.com/avatar1.jpg
+
+        name:
+          type: string
+          example: Иванов Иван Иванович
+
+        type:
+          type: string
+          example: pro
+
+    userLogin:
+      type: object
+
+      properties:
+        email:
+          type: string
+          example: qwerty@gmail.com
+
+        password:
+          type: string
+          example: qwerty123
+
+    createOffer:
+      type: object
+
+      properties:
+        name:
+          type: string
+          minLength: 10
+          maxLength: 100
+          example: Двушка в центре
+
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+          example: Подходит для путешественников и семей с одним ребенком
+
+        datePublished:
+          type: string
+          format: date-time
+          example: "2024-06-15T18:00:00+03:00"
+
+        city:
+          type: string
+          items:
+            type: string
+            enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: Paris
+
+        previewImage:
+          type: string
+          pattern: '^.*\.(jpg|jpeg|png)$'
+          example: https://preview.com/image-1.jpg
+
+        images:
+          type: array
+          minItems: 6
+          items:
+            type: string
+            pattern: '^.*\.(jpg|jpeg|png)$'
+          example: ["https://images.com/image-1.jpg", "https://images.com/image-2.jpg", "https://images.com/image-3.jpg", "https://images.com/image-4.jpg", "https://images.com/image-5.jpg", "https://images.com/image-6.jpg"]
+
+        isPremium:
+          type: boolean
+          example: true
+
+        isFavorite:
+          type: boolean
+          example: true
+
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          example: 1.2
+
+        type:
+          type: string
+          items:
+            type: string
+            enum: ['apartment', 'house', 'room', 'hotel']
+          example: hotel
+
+        roomsNumber:
+          type: number
+          minimum: 1
+          maximum: 8
+          example: 2
+
+        guestNumber:
+          type: number
+          minimum: 1
+          maximum: 10
+          example: 5
+
+        price:
+          type: number
+          minimum: 100
+          maximum: 100000
+          example: 50000
+
+        convenience:
+          type: array
+          items:
+            type: string
+            enum: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace', 'Baby seat', 'Washer', 'Towels', 'Fridge']
+          minItems: 1
+          example: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace']
+
+        authorId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+              example: 50.938361
+
+            longitude:
+              type: number
+              format: float
+              example: 6.959974
+
+    offerList:
+      type: array
+      items:
+        type: object
+
+        properties:
+          id:
+            type: string
+            example: 6329c3d6a04ab1061c6425ea
+
+          price:
+            type: number
+            minimum: 100
+            maximum: 100000
+            example: 50000
+
+          name:
+            type: string
+            minLength: 10
+            maxLength: 100
+            example: Двушка в центре
+
+          type:
+            type: string
+            items:
+              type: string
+              enum: ['apartment', 'house', 'room', 'hotel']
+            example: hotel
+
+          isFavorite:
+            type: boolean
+            example: true
+
+          datePublished:
+            type: string
+            format: date-time
+            example: "2024-06-15T18:00:00+03:00"
+
+          city:
+            type: string
+            items:
+              type: string
+              enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+            example: Paris
+
+          previewImage:
+            type: string
+            pattern: '^.*\.(jpg|jpeg|png)$'
+            example: https://preview.com/image-1.jpg
+
+          isPremium:
+            type: boolean
+            example: true
+
+          rating:
+            type: number
+            format: float
+            minimum: 1
+            maximum: 5
+            example: 1.2
+
+          commentsCount:
+            type: number
+            example: 6
+
+
+    offer:
+      type: object
+
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-06-15T18:00:00+03:00"
+
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-06-15T18:00:00+03:00"
+
+        name:
+          type: string
+          minLength: 10
+          maxLength: 100
+          example: Двушка в центре
+
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+          example: Подходит для путешественников и семей с одним ребенком
+
+        datePublished:
+          type: string
+          format: date-time
+          example: "2024-06-15T18:00:00+03:00"
+
+        city:
+          type: string
+          items:
+            type: string
+            enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: Paris
+
+        previewImage:
+          type: string
+          pattern: '^.*\.(jpg|jpeg|png)$'
+          example: https://preview.com/image-1.jpg
+
+        images:
+          type: array
+          minItems: 6
+          items:
+            type: string
+            pattern: '^.*\.(jpg|jpeg|png)$'
+          example: ["https://images.com/image-1.jpg", "https://images.com/image-2.jpg", "https://images.com/image-3.jpg", "https://images.com/image-4.jpg", "https://images.com/image-5.jpg", "https://images.com/image-6.jpg"]
+
+        isPremium:
+          type: boolean
+          example: true
+
+        isFavorite:
+          type: boolean
+          example: true
+
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          example: 1.2
+
+        type:
+          type: string
+          items:
+            type: string
+            enum: ['apartment', 'house', 'room', 'hotel']
+          example: hotel
+
+        roomsNumber:
+          type: number
+          minimum: 1
+          maximum: 8
+          example: 2
+
+        guestNumber:
+          type: number
+          minimum: 1
+          maximum: 10
+          example: 5
+
+        price:
+          type: number
+          minimum: 100
+          maximum: 100000
+          example: 50000
+
+        convenience:
+          type: array
+          items:
+            type: string
+            enum: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace', 'Baby seat', 'Washer', 'Towels', 'Fridge']
+          minItems: 1
+          example: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace']
+
+        authorId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+              example: 50.938361
+
+            longitude:
+              type: number
+              format: float
+              example: 6.959974
+
+    updateOffer:
+      type: object
+
+      properties:
+        name:
+          type: string
+          minLength: 10
+          maxLength: 100
+          example: Двушка в центре
+
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+          example: Подходит для путешественников и семей с одним ребенком
+
+        datePublished:
+          type: string
+          format: date-time
+          example: "2024-06-15T18:00:00+03:00"
+
+        city:
+          type: string
+          items:
+            type: string
+            enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: Paris
+
+        previewImage:
+          type: string
+          pattern: '^.*\.(jpg|jpeg|png)$'
+          example: https://preview.com/image-1.jpg
+
+        images:
+          type: array
+          minItems: 6
+          items:
+            type: string
+            pattern: '^.*\.(jpg|jpeg|png)$'
+          example: ["https://images.com/image-1.jpg", "https://images.com/image-2.jpg", "https://images.com/image-3.jpg", "https://images.com/image-4.jpg", "https://images.com/image-5.jpg", "https://images.com/image-6.jpg"]
+
+        isPremium:
+          type: boolean
+          example: true
+
+        isFavorite:
+          type: boolean
+          example: true
+
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          example: 1.2
+
+        type:
+          type: string
+          items:
+            type: string
+            enum: ['apartment', 'house', 'room', 'hotel']
+          example: hotel
+
+        roomsNumber:
+          type: number
+          minimum: 1
+          maximum: 8
+          example: 2
+
+        guestNumber:
+          type: number
+          minimum: 1
+          maximum: 10
+          example: 5
+
+        price:
+          type: number
+          minimum: 100
+          maximum: 100000
+          example: 50000
+
+        convenience:
+          type: array
+          items:
+            type: string
+            enum: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace', 'Baby seat', 'Washer', 'Towels', 'Fridge']
+          minItems: 1
+          example: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace']
+
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+              example: 50.938361
+
+            longitude:
+              type: number
+              format: float
+              example: 6.
+
+    createComment:
+      type: object
+
+      properties:
+        text:
+          type: string
+          minLength: 5
+          maxLength: 100
+          example: Очень дорого
+
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 3
+
+        authorId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        offerId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+    comment:
+      type: object
+
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        text:
+          type: string
+          minLength: 5
+          maxLength: 100
+          example: Очень дорого
+
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 3
+
+        authorId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+        offerId:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+
+
+
+
