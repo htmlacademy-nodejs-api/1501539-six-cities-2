@@ -72,7 +72,8 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({
     min: [1, 'Min rating 1'],
-    max: [5, 'Max rating 5']
+    max: [5, 'Max rating 5'],
+    default: 0
   })
   public rating!: number;
 
