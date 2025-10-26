@@ -5,34 +5,25 @@ import { Logger } from '../../libs/logger/logger.interface.js';
 import { types, DocumentType } from '@typegoose/typegoose';
 import { CommentEntity } from './comment.entity.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
+import { OfferService } from '../offer/offer-service.interface.js';
 
 @injectable()
 export class DefaultCommentService implements CommentService {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
-    @inject(Component.CommentModule) private readonly commentModule: types.ModelType<CommentEntity>
+    @inject(Component.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
+    @inject(Component.OfferService) private readonly offerService: OfferService
   ) {}
 
   public async create(dto: CreateCommentDto): Promise<DocumentType<CommentEntity>> {
-    const result = await this.commentModule.create(dto);
+    const result = await this.commentModel.create({...dto, datePublished: new Date()});
     this.logger.info(`New comment created: ${result.id}`);
+    await this.offerService.updateRating(dto.offerId);
 
-    return result.populate('authorId');
-  }
-
-  public async findById(id: string): Promise<DocumentType<CommentEntity> | null> {
-    return this.commentModule.findById(id).populate('authorId').exec();
-  }
-
-  public async findByAuthorId(authorId: string): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({authorId}).populate('authorId').exec();
+    return result.populate(['userId']);
   }
 
   public async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({offerId}).populate('authorId').exec();
-  }
-
-  public async findByRating(rating: number): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModule.find({rating}).populate('authorId').exec();
+    return this.commentModel.find({offerId}).populate(['userId']).exec();
   }
 }

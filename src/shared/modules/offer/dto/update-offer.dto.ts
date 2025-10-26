@@ -1,6 +1,6 @@
 import { Coordinates, OfferConvenience, OfferType } from '../../../types/index.js';
 
-export class CreateOfferDto {
+export class UpdateOfferDto {
   public name!: string;
   public description!: string;
   public datePublished!: Date;
@@ -15,6 +15,5 @@ export class CreateOfferDto {
   public guestNumber!: number;
   public price!: number;
   public convenience!: OfferConvenience[];
-  public authorId!: string;
   public coordinates!: Coordinates;
 }

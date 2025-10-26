@@ -20,14 +20,14 @@ export class CommentEntity extends defaultClasses.TimeStamps {
   @prop({ required })
   public datePublished!: Date;
 
-  @prop({ required, min: [1, 'Min rating 1'], max: [5, 'Max rating 5'] })
+  @prop({ min: [1, 'Min rating 1'], max: [5, 'Max rating 5'], default: null })
   public rating!: number;
 
   @prop({ ref: UserEntity, required })
-  public authorId!: Ref<UserEntity>;
+  public userId!: Ref<UserEntity>;
 
   @prop({ ref: OfferEntity, required })
   public offerId!: Ref<OfferEntity>;
 }
 
-export const CommentModule = getModelForClass(CommentEntity);
+export const CommentModel = getModelForClass(CommentEntity);
