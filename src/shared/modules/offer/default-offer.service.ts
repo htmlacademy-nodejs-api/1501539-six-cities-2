@@ -7,15 +7,15 @@ import { Logger } from '../../libs/logger/logger.interface.js';
 import { OfferEntity } from './offer.entity.js';
 import { UpdateOfferDto } from './dto/update-offer.dto.js';
 import { CitiesName } from '../../types/cities-name.enum.js';
-import { OfferRatingService } from '../offer-rating/index.js';
 import { ObjectId } from 'mongodb';
+import { FavoriteService } from '../favorite/index.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
-    @inject(Component.OfferRatingService) private readonly offerRatingService: OfferRatingService,
+    @inject(Component.FavoriteService) private readonly favoriteService: FavoriteService,
   ) {}
 
   public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
@@ -48,12 +48,12 @@ export class DefaultOfferService implements OfferService {
     return this.offerModel.find({isPremium: true, city}).limit(limit).populate(['authorId']).exec();
   }
 
-  public async findFavorite(): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find({isFavorite: true}).populate(['authorId']).exec();
-  }
-
-  public async favoriteToggle(id:string, isFavorite: boolean): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel.findByIdAndUpdate(id, {isFavorite}, {new:true}).populate(['authorId']).exec();
+  public async findFavoriteOffersForUser(userId: string): Promise<DocumentType<OfferEntity>[]> {
+    const favoritesByUserId = await this.favoriteService.findByUserId(userId);
+    const favoriteOffers = await this.offerModel.find({
+      _id: [...favoritesByUserId.map((favorite) => favorite.offerId)]
+    });
+    return favoriteOffers;
   }
 
   public async incCommentCount(id: string): Promise<DocumentType<OfferEntity> | null> {
@@ -64,8 +64,7 @@ export class DefaultOfferService implements OfferService {
     }).exec();
   }
 
-  public async updateRating(id: string, userId: string, rating: number): Promise<DocumentType<OfferEntity> | null> {
-    await this.offerRatingService.create({offerId: id, userId, rating});
+  public async updateRating(id: string): Promise<DocumentType<OfferEntity> | null> {
     const aggregateResult = await this.offerModel.aggregate([
       {
         $match: {
@@ -74,7 +73,7 @@ export class DefaultOfferService implements OfferService {
       },
       {
         $lookup: {
-          from: 'offer-rating',
+          from: 'comments',
           let: {
             offerId: '$_id'
           },
@@ -90,23 +89,35 @@ export class DefaultOfferService implements OfferService {
               $project: {rating: 1}
             }
           ],
-          as: 'offer-rating'
+          as: 'comments'
         }
       },
       {
         $addFields: {
           rating: {
             $round: [
-              { $avg: '$offer-rating.rating' },
+              { $avg: '$comments.rating' },
               1
             ]
           }
         }
       },
       {
-        $unset: 'offer-rating'
-      }
+        $unset: 'comments'
+      },
     ]).exec();
+    this.logger.info(`aggregeteResult: ${JSON.stringify(aggregateResult?.[0])}`);
+    const newRating = aggregateResult?.[0]?.rating;
+
+    if (newRating !== undefined) {
+      await this.offerModel.updateOne({
+        _id: new ObjectId(id)
+      },
+      {
+        rating: newRating
+      });
+    }
+
     return aggregateResult?.[0];
   }
 }

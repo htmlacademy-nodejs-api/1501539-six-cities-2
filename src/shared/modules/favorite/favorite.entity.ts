@@ -1,36 +1,29 @@
 import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
 import { UserEntity } from '../user/user.entity.js';
-import { CommentEntity } from '../comment/index.js';
+import { OfferEntity } from '../offer/offer.entity.js';
 
 const required = true;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface CommentRatingEntity extends defaultClasses.Base {}
+export interface FavoriteEntity extends defaultClasses.Base {}
 @modelOptions({
   schemaOptions: {
-    collection: 'comment-rating'
+    collection: 'favorites'
   }
 })
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export class CommentRatingEntity extends defaultClasses.TimeStamps {
-  @prop({
-    min: 1,
-    max: 5,
-    required
-  })
-  public rating!: number;
-
+export class FavoriteEntity extends defaultClasses.TimeStamps {
   @prop({
     ref: UserEntity,
-    required,
+    required
   })
   public userId!: Ref<UserEntity>;
 
   @prop({
-    ref: CommentEntity,
+    ref: OfferEntity,
     required
   })
-  public commentId!: Ref<CommentEntity>;
+  public offerId!: Ref<OfferEntity>;
 }
 
-export const CommentRatingModel = getModelForClass(CommentRatingEntity);
+export const FavoriteModel = getModelForClass(FavoriteEntity);

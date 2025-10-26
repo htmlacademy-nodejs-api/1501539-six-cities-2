@@ -9,7 +9,7 @@ export class CreateOfferDto {
   public images!: string[];
   public isPremium!: boolean;
   public isFavorite!: boolean;
-  public rating!: number;
+  public rating?: number;
   public type!: OfferType;
   public roomsNumber!: number;
   public guestNumber!: number;
