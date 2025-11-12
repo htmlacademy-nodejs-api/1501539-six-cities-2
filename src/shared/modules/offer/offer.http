@@ -1,0 +1,123 @@
+#Offers
+## Create Offer
+
+POST http://localhost:4000/offers/create HTTP/1.1
+Content-Type: application/json
+Authorization: 'Bearer 123'
+
+{
+  "name": "Двушка в центре",
+  "description": "Подходит для путешественников и семей с одним ребенком",
+  "datePublished": "2024-06-15T18:00:00+03:00",
+  "city": "Paris",
+  "previewImage": "https://preview.com/image-1.jpg",
+  "images": [
+    "https://images.com/image-1.jpg",
+    "https://images.com/image-2.jpg",
+    "https://images.com/image-3.jpg",
+    "https://images.com/image-4.jpg",
+    "https://images.com/image-5.jpg",
+    "https://images.com/image-6.jpg"
+  ],
+  "isPremium": true,
+  "isFavorite": true,
+  "type": "hotel",
+  "roomsNumber": 2,
+  "guestNumber": 5,
+  "price": 50000,
+  "convenience": [
+    "Breakfast",
+    "Air conditioning",
+    "Laptop friendly workspace"
+  ],
+  "authorId": "6329c3d6a04ab1061c6425ea",
+  "coordinates": {
+    "latitude": 50.938361,
+    "longitude": 6.959974
+  }
+}
+
+###
+
+# Offers
+
+GET http://localhost:4000/offers HTTP/1.1
+Content-Type: application/json
+
+###
+
+# Offer details
+GET http://localhost:4000/offers/68ebcba584f660fc2764de64 HTTP/1.1
+Content-Type: application/json
+
+###
+
+# Update offer
+
+PATCH http://localhost:4000/offers/68ebcba584f660fc2764de64 HTTP/1.1
+Content-Type: application/json
+Authorization: 'Bearer 123'
+
+{
+  "id": "68ebcba584f660fc2764de64",
+  "name": "Президентский люкс",
+  "description": "Свежий воздух как на альпийских лугах, свалка рядом не мешает",
+  "datePublished": "2025-10-11T15:36:13.832Z",
+  "city": "Hamburg",
+  "previewImage": "https://preview.com/image-3.jpg",
+  "images": [
+    "https://images.com/image-1.jpg",
+    "https://images.com/image-2.jpg",
+    "https://images.com/image-3.jpg",
+    "https://images.com/image-4.jpg",
+    "https://images.com/image-5.jpg",
+    "https://images.com/image-6.jpg"
+  ],
+  "isPremium": false,
+  "isFavorite": false,
+  "type": "room",
+  "roomsNumber": 7,
+  "guestNumber": 1,
+  "price": 36773,
+  "coordinates": {
+    "latitude": 53.550341,
+    "longitude": 10.000654
+  }
+}
+
+###
+
+# Delete offer
+
+DELETE  http://localhost:4000/offers/68ebcba584f660fc2764de8e HTTP/1.1
+Content-Type: application/json
+Authorization: 'Bearer 123'
+
+###
+
+# get premium offers
+
+GET http://localhost:4000/offers/premium?city=Paris HTTP/1.1
+Content-Type: application/json
+
+###
+
+# get favorite offers
+
+GET http://localhost:4000/offers/favorite HTTP/1.1
+Content-Type: application/json
+Authorization: 'Bearer 123'
+
+###
+
+# toggle favorite offers
+
+POST http://localhost:4000/offers/favorite HTTP/1.1
+Content-Type: application/json
+Authorization: 'Bearer 123'
+
+{
+  "offerId": "68ebcba584f660fc2764de67"
+}
+
+###

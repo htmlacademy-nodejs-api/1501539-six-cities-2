@@ -40,11 +40,12 @@ export class DefaultOfferService implements OfferService {
     this.offerModel.findByIdAndDelete(id).exec();
   }
 
-  public async find(): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find().populate(['authorId']).exec();
+  public async find(pageSize: number, page: number): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel.find().populate(['authorId']).skip((page - 1) * pageSize).limit(pageSize).exec();
   }
 
-  public async findPremiumByCity(city: CitiesName, limit: number): Promise<DocumentType<OfferEntity>[]> {
+  public async findPremiumByCity(city: CitiesName): Promise<DocumentType<OfferEntity>[]> {
+    const limit = 3;
     return this.offerModel.find({isPremium: true, city}).limit(limit).populate(['authorId']).exec();
   }
 

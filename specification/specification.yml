@@ -87,15 +87,15 @@ paths:
                     type: string
                     example: Bearer token
 
-        "400":
+        "401":
           description: Отсутствуют обязательные поля (логин или пароль).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
               example:
-                message: 'Неверный пароль'
-                code: 'INVALID_PASSWORD'
+                message: 'Неверный логин или пароль'
+                code: 'INVALID_CREDENTIALS'
 
     get:
       tags:
@@ -149,7 +149,7 @@ paths:
                 $ref: '#/components/schemas/error'
               example:
                 message: 'Пользователь не авторизован'
-                example: 'USER_NOT_AUTHORIZED'
+                code: 'USER_NOT_AUTHORIZED'
 
   /users/{userId}/avatar:
     post:
@@ -232,6 +232,7 @@ paths:
 
       parameters:
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
 
       responses:
         "200":
@@ -255,6 +256,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
+
+        "404":
+          description: Оффер не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: "Оффер не найден"
+                code: "NOT_FOUND"
+
 
     patch:
       tags:
@@ -299,6 +311,16 @@ paths:
               example:
                 message: 'Пользователь не авторизован'
                 example: 'USER_NOT_AUTHORIZED'
+
+        "404":
+          description: Оффер не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: 'Оффер не найден'
+                example: 'NOT_FOUND'
 
     delete:
       tags:
@@ -355,6 +377,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/offerList'
+
+        "400":
+          description: Неверно переданы данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                message: "Нужно указать город"
+                code: "CITY_NOT_ENTERED"
 
   /offers/favorite:
     get:
@@ -507,6 +539,15 @@ components:
         maximum: 60
         default: 20
       description: Количество записей
+
+    page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 1
+      description: Номер страницы
 
   schemas:
     error:
@@ -763,16 +804,6 @@ components:
         id:
           type: string
           example: 6329c3d6a04ab1061c6425ea
-
-        createdAt:
-          type: string
-          format: date-time
-          example: "2024-06-15T18:00:00+03:00"
-
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2024-06-15T18:00:00+03:00"
 
         name:
           type: string

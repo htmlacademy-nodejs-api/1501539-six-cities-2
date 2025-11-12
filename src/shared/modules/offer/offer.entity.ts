@@ -7,7 +7,7 @@ const trim = true;
 const required = true;
 const IMAGES_MAX_LENGTH = 6;
 
-class Coordinates {
+export class Coordinates {
   @prop({ required })
   public latitude!: number;
 
@@ -73,7 +73,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({
     min: [1, 'Min rating 1'],
     max: [5, 'Max rating 5'],
-    default: 0
   })
   public rating!: number;
 
