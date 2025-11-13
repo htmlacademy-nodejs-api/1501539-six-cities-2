@@ -6,7 +6,7 @@
     "previewImages": ["https://preview.com/image-1.jpg", "https://preview.com/image-2.jpg", "https://preview.com/image-3.jpg", "https://preview.com/image-4.jpg", "https://preview.com/image-5.jpg", "https://preview.com/image-6.jpg"],
     "images": ["https://images.com/image-1.jpg", "https://images.com/image-2.jpg", "https://images.com/image-3.jpg", "https://images.com/image-4.jpg", "https://images.com/image-5.jpg", "https://images.com/image-6.jpg"],
     "isPremium": [true, false],
-    "isFavorite": [true, false],
+    "isFavorite": [false],
     "types": ["apartment", "house", "room", "hotel"],
     "conveniences": ["Breakfast", "Air conditioning", "Laptop friendly workspace", "Baby seat", "Washer", "Towels", "Fridge"],
     "authors": [{

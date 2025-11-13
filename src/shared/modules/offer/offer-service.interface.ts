@@ -9,8 +9,8 @@ export interface OfferService {
   findById(id: string): Promise<DocumentType<OfferEntity> | null>;
   updateById(id: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null>;
   deleteById(id: string): Promise<void>;
-  find(): Promise<DocumentType<OfferEntity>[]>;
-  findPremiumByCity(city: CitiesName, limit: number): Promise<DocumentType<OfferEntity>[]>;
+  find(pageSize: number, page: number): Promise<DocumentType<OfferEntity>[]>;
+  findPremiumByCity(city: CitiesName): Promise<DocumentType<OfferEntity>[]>;
   findFavoriteOffersForUser(userId: string): Promise<DocumentType<OfferEntity>[]>;
   incCommentCount(id:string): Promise<DocumentType<OfferEntity> | null>;
   updateRating(id: string): Promise<DocumentType<OfferEntity> | null>;
