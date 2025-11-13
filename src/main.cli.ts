@@ -10,6 +10,7 @@ import { Component } from './shared/types/component.enum.js';
 import { createUserContainer } from './shared/modules/user/index.js';
 import { createOfferContainer } from './shared/modules/offer/index.js';
 import { createCommentContainer } from './shared/modules/comment/index.js';
+import { createFavoriteContainer } from './shared/modules/favorite/index.js';
 
 const bootstrap = () => {
   const appContainer = new Container();
@@ -17,6 +18,7 @@ const bootstrap = () => {
   createUserContainer(appContainer);
   createOfferContainer(appContainer);
   createCommentContainer(appContainer);
+  createFavoriteContainer(appContainer);
 
   const app = appContainer.get<CliApp>(Component.CliApplication);
   app.registerCommands([new HelpCommand(), appContainer.get<ImportCommand>(Component.ImportCommand), new VersionCommand(), new GenerateCommand()]);

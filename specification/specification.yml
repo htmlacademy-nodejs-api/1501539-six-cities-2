@@ -231,6 +231,7 @@ paths:
       description: Позволяет получить список предложений по аренде
 
       parameters:
+        - $ref: '#/components/parameters/AuthorizationHeaderOptional'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/page'
 
@@ -248,6 +249,8 @@ paths:
         - offers
       summary: Детальная информация по предложению по аренде
       description: Отдает детальную информацию по предложению
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationHeaderOptional'
 
       responses:
         "200":
@@ -523,6 +526,16 @@ components:
       name: Authorization
       in: header
       required: true
+      description: JWT токен для аутентификации
+      schema:
+        type: string
+        pattern: '^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$'
+        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    AuthorizationHeaderOptional:
+      name: Authorization
+      in: header
+      required: false
       description: JWT токен для аутентификации
       schema:
         type: string

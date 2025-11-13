@@ -47,7 +47,7 @@ Content-Type: application/json
 ###
 
 # Offer details
-GET http://localhost:4000/offers/68ebcba584f660fc2764de64 HTTP/1.1
+GET http://localhost:4000/offers/6916065c205ce09e9b918d41 HTTP/1.1
 Content-Type: application/json
 
 ###
