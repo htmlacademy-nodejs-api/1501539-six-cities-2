@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { RequestParams } from '../../../libs/rest/types/request-params.js';
 import { ResponseBody } from '../../../libs/rest/types/response-body.js';
-import { LoginUserDto } from '../dto/login-user.dto.js';
+import { CreateCommentDto } from '../dto/create-comment.dto.js';
 
-export type LoginUserRequest = Request<RequestParams, ResponseBody, LoginUserDto>;
+export type CreateCommentRequest = Request<RequestParams, ResponseBody, CreateCommentDto>;

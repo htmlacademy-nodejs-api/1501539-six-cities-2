@@ -22,7 +22,7 @@ export class DefaultOfferService implements OfferService {
     const result = await this.offerModel.create(dto);
     this.logger.info(`New offer created, offerId: ${result.name}`);
 
-    return result;
+    return result.populate(['authorId']);
   }
 
   public async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
@@ -120,5 +120,9 @@ export class DefaultOfferService implements OfferService {
     }
 
     return aggregateResult?.[0];
+  }
+
+  public async exists(documentId: string): Promise<boolean> {
+    return Boolean(await this.offerModel.findById(documentId));
   }
 }
