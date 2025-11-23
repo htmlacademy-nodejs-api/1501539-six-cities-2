@@ -19,11 +19,12 @@ export class DefaultCommentService implements CommentService {
     const result = await this.commentModel.create({...dto, datePublished: new Date()});
     this.logger.info(`New comment created: ${result.id}`);
     await this.offerService.updateRating(dto.offerId);
+    await this.offerService.incCommentCount(dto.offerId);
 
-    return result.populate(['userId']);
+    return result.populate(['authorId']);
   }
 
   public async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModel.find({offerId}).populate(['userId']).exec();
+    return this.commentModel.find({offerId}).populate(['authorId']).exec();
   }
 }

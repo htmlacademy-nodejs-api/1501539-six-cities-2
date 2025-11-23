@@ -1,21 +1,27 @@
 import { inject, injectable } from 'inversify';
-import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, ValidateDtoMiddleware } from '../../libs/rest/index.js';
 import { Component } from '../../types/component.enum.js';
 import { Logger } from '../../libs/logger/logger.interface.js';
 import { OfferService } from './offer-service.interface.js';
 import { Request, Response } from 'express';
 import { fillDTO } from '../../helpers/common.js';
 import { OfferRdo } from './rdo/offer.rdo.js';
-import { CreateOfferRequest } from './request-types/create-offer-request.type.js';
+import { CreateOfferRequest } from './types/create-offer-request.type.js';
 import { StatusCodes } from 'http-status-codes';
 import { OfferDetailsRdo } from './rdo/offer-details.rdo.js';
-import { UpdateOfferRequest } from './request-types/update-offer-request.type.js';
-import { GetOffersRequest } from './request-types/get-offers-request.type.js';
-import { GetPremiumOffersRequest } from './request-types/get-premium-offers-request.type.js';
+import { UpdateOfferRequest } from './types/update-offer-request.type.js';
+import { GetOffersRequest } from './types/get-offers-request.type.js';
+import { GetPremiumOffersRequest } from './types/get-premium-offers-request.type.js';
 import { CitiesName } from '../../types/cities-name.enum.js';
 import { USER_NOT_AUTHORIZED_ERROR } from '../../libs/rest/errors/user-not-authorized-error.js';
-import { ToggleFavoriteOfferRequest } from './request-types/toggle-favorite-offer-request.type.js';
+import { ToggleFavoriteOfferRequest } from './types/toggle-favorite-offer-request.type.js';
 import { FavoriteService } from '../favorite/favorite-service.interface.js';
+import { ParamOfferId } from './types/params-offerid.type.js';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-objectid.middleware.js';
+import { CreateOfferDto } from './dto/create-offer.dto.js';
+import { UpdateOfferDto } from './dto/update-offer.dto.js';
+import { ToggleFavoriteDto } from '../favorite/dto/toggle-favorite.dto.js';
+import { DocumentExistMiddleware } from '../../libs/rest/middleware/document-exist.middleware.js';
 
 enum OfferPaths {
   Index = '/',
@@ -27,7 +33,6 @@ enum OfferPaths {
 
 const DEFAULT_PAGE_SIZE = '20';
 const DEFAULT_PAGE = '1';
-const OFFER_NOT_FOUND_ERROR = new HttpError(StatusCodes.NOT_FOUND, 'Оффер не найден', 'NOT_FOUND');
 
 @injectable()
 export class OfferController extends BaseController {
@@ -39,13 +44,25 @@ export class OfferController extends BaseController {
     super(logger);
 
     this.addRoute({path: OfferPaths.Index, method: HttpMethod.Get, handler: this.index});
-    this.addRoute({path: OfferPaths.Create, method: HttpMethod.Post, handler: this.createOffer});
+    this.addRoute({path: OfferPaths.Create, method: HttpMethod.Post, handler: this.createOffer, middlewares: [new ValidateDtoMiddleware(CreateOfferDto)]});
     this.addRoute({path: OfferPaths.Premium, method: HttpMethod.Get, handler: this.getPremiumOffers});
     this.addRoute({path: OfferPaths.Favorite, method: HttpMethod.Get, handler: this.getFavoriteOffers});
-    this.addRoute({path: OfferPaths.Favorite, method: HttpMethod.Post, handler: this.toggleFavoriteOffer});
-    this.addRoute({path: OfferPaths.Offer, method: HttpMethod.Get, handler: this.getOffer});
-    this.addRoute({path: OfferPaths.Offer, method: HttpMethod.Patch, handler: this.updateOffer});
-    this.addRoute({path: OfferPaths.Offer, method: HttpMethod.Delete, handler: this.deleteOffer});
+    this.addRoute({path: OfferPaths.Favorite, method: HttpMethod.Post, handler: this.toggleFavoriteOffer, middlewares: [new ValidateDtoMiddleware(ToggleFavoriteDto)]});
+    this.addRoute({
+      path: OfferPaths.Offer,
+      method: HttpMethod.Get,
+      handler: this.getOffer,
+      middlewares: [new ValidateObjectIdMiddleware('id'), new DocumentExistMiddleware(this.offerService, 'Предложение', 'id')]});
+    this.addRoute({
+      path: OfferPaths.Offer,
+      method: HttpMethod.Patch,
+      handler: this.updateOffer,
+      middlewares: [new ValidateObjectIdMiddleware('id'), new ValidateDtoMiddleware(UpdateOfferDto), new DocumentExistMiddleware(this.offerService, 'Предложение', 'id')]});
+    this.addRoute({
+      path: OfferPaths.Offer,
+      method: HttpMethod.Delete,
+      handler: this.deleteOffer,
+      middlewares: [new ValidateObjectIdMiddleware('id'), new DocumentExistMiddleware(this.offerService, 'Предложение', 'id')]});
   }
 
   public async index({query}: GetOffersRequest, res: Response): Promise<void> {
@@ -69,45 +86,31 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(OfferDetailsRdo, result));
   }
 
-  public async getOffer({params}: Request, res: Response) {
+  public async getOffer({params}: Request<ParamOfferId>, res: Response) {
     const {id} = params;
-    const existOffer = await this.offerService.findById(id);
+    const offer = await this.offerService.findById(id);
 
-    if (!existOffer) {
-      throw OFFER_NOT_FOUND_ERROR;
-    }
-
-    this.ok(res, fillDTO(OfferDetailsRdo, existOffer));
+    this.ok(res, fillDTO(OfferDetailsRdo, offer));
   }
 
   public async updateOffer({body, headers, params}: UpdateOfferRequest, res: Response) {
     const {id} = params;
     const isAuthorization = !!headers.authorization;
-    const existedOffer = await this.offerService.findById(id);
 
     if (!isAuthorization) {
       throw USER_NOT_AUTHORIZED_ERROR;
-    }
-
-    if (!existedOffer) {
-      throw OFFER_NOT_FOUND_ERROR;
     }
 
     const result = await this.offerService.updateById(id as string, body);
     this.ok(res, fillDTO(OfferDetailsRdo, result));
   }
 
-  public async deleteOffer({params, headers}: Request, res: Response) {
+  public async deleteOffer({params, headers}: Request<ParamOfferId>, res: Response) {
     const {id} = params;
     const isAuthorization = !!headers.authorization;
-    const existedOffer = await this.offerService.findById(id as string);
 
     if (!isAuthorization) {
       throw USER_NOT_AUTHORIZED_ERROR;
-    }
-
-    if (!existedOffer) {
-      throw OFFER_NOT_FOUND_ERROR;
     }
 
     await this.offerService.deleteById(id as string);

@@ -6,6 +6,6 @@ export enum UserType {
 export interface User {
   name: string;
   email: string;
-  avatar: string;
+  avatar?: string;
   type: UserType;
 }

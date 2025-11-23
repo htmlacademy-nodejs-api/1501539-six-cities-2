@@ -25,14 +25,13 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
   public email: string;
 
   @prop({
-    require,
     trim,
     validate: {
       validator: (value:string) => /\.(jpg|jpeg|png)$/i.test(value),
       message: 'Avatar can be only .jpg, .jpeg, .png extension'
     }
   })
-  public avatar: string;
+  public avatar?: string;
 
   @prop({
     require,

@@ -35,4 +35,8 @@ export class DefaultUserService implements UserService {
 
     return this.create(dto, salt);
   }
+
+  public async exists(documentId: string): Promise<boolean> {
+    return Boolean(await this.userModel.findById(documentId));
+  }
 }
