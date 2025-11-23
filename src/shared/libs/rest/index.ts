@@ -8,3 +8,5 @@ export * from './errors/http-error.js';
 export * from './middleware/middlewate.interface.js';
 export * from './middleware/validate-dto.middleware.js';
 export * from './middleware/validate-objectid.middleware.js';
+export * from './middleware/document-exist.middleware.js';
+export * from './middleware/upload-file.middleware.js';
