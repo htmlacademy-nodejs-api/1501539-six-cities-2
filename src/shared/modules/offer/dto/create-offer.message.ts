@@ -60,5 +60,8 @@ export const CreateOfferValidationMessage = {
   coordinates: {
     latitude: 'Широта должна быть в диапазоне от -90 до 90',
     longitude: 'Долгота должна быть в диапазоне от -180 до 180'
+  },
+  commentNumber: {
+    invalidFormat: 'Значение должно быть числом'
   }
 };

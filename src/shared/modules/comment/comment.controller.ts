@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { BaseController, HttpError, HttpMethod, ValidateDtoMiddleware } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Component } from '../../types/component.enum.js';
 import { Logger } from '../../libs/logger/index.js';
 import { CommentService } from './comment-service.interface.js';
@@ -13,7 +13,7 @@ import { CommentRdo } from './rdo/comment.rdo.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 
 enum CommentPaths {
-  Index = '/',
+  Index = '/:offerId',
   Create = '/create'
 }
 
@@ -25,12 +25,12 @@ export class CommentController extends BaseController {
   ) {
     super(logger);
 
-    this.addRoute({path: CommentPaths.Index, method: HttpMethod.Get, handler: this.index});
+    this.addRoute({path: CommentPaths.Index, method: HttpMethod.Get, handler: this.index, middlewares: [new ValidateObjectIdMiddleware('offerId')]});
     this.addRoute({path: CommentPaths.Create, method: HttpMethod.Post, handler: this.createComment, middlewares: [new ValidateDtoMiddleware(CreateCommentDto)]});
   }
 
-  public async index({query}: GetCommentsRequest, res: Response) {
-    const {offerId} = query;
+  public async index({params}: GetCommentsRequest, res: Response) {
+    const {offerId} = params;
 
     if (!offerId) {
       throw new HttpError(StatusCodes.BAD_REQUEST, 'Необходимо передать параметр offerId', 'OFFER_ID_IS_MISSING');
