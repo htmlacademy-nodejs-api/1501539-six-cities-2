@@ -4,7 +4,7 @@ POST http://localhost:4000/users/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "pro51@gmail.com",
+  "email": "pro511@gmail.com",
   "password": "test123",
   "name": "Владислав",
   "type": "pro"
@@ -18,15 +18,22 @@ POST http://localhost:4000/users/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "pro5@gmail.com",
+  "email": "pro511@gmail.com",
   "password": "test123"
 }
 
 ###
 
-# Download avatar
+## Отправить изображение
 
-POST http://localhost:4000/users/6921d413f37624f127318b75/avatar HTTP/1.1
-Content-Type: application/json
+POST http://localhost:4000/users/6922fd032641e5a9f5d40e26/avatar HTTP/1.1
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-###
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="javascript-learn.jpg"
+Content-Type: image/png
+
+< /Users/mikhailbespyatov/Documents/javascript-learn.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+##

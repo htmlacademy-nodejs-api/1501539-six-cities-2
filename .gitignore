@@ -13,3 +13,4 @@ coverage
 .cursorignore
 .env
 /logs/
+/uploads/

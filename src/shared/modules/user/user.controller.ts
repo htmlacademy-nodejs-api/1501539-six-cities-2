@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { BaseController, HttpError, HttpMethod, ValidateDtoMiddleware } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, UploadFileMiddleware, ValidateDtoMiddleware } from '../../libs/rest/index.js';
 import { Component } from '../../types/component.enum.js';
 import { Logger } from '../../libs/logger/logger.interface.js';
 import { Request, Response } from 'express';
@@ -16,6 +16,7 @@ import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { LoginUserDto } from './dto/login-user.dto.js';
 import { DocumentExistMiddleware } from '../../libs/rest/middleware/document-exist.middleware.js';
+import fs from 'node:fs/promises';
 
 enum UserPaths {
   Register = '/register',
@@ -42,7 +43,11 @@ export class UserController extends BaseController {
     this.addRoute({ path: UserPaths.Login, method: HttpMethod.Get, handler: this.checkLogin });
     this.addRoute({ path: UserPaths.Login, method: HttpMethod.Post, handler: this.login, middlewares: [new ValidateDtoMiddleware(LoginUserDto)] });
     this.addRoute({ path: UserPaths.Logout, method: HttpMethod.Post, handler: this.logout });
-    this.addRoute({ path: UserPaths.DownloadAvatar, method: HttpMethod.Post, handler: this.downloadAvatar, middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistMiddleware(this.userService, 'Пользователь', 'userId')] });
+    this.addRoute({
+      path: UserPaths.DownloadAvatar,
+      method: HttpMethod.Post,
+      handler: this.downloadAvatar,
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistMiddleware(this.userService, 'Пользователь', 'userId'), new UploadFileMiddleware(this.config.get('UPLOAD_DIRECTORY'), 'avatar')] });
   }
 
   public async register({body}: CreateUserRequest, res: Response): Promise<void> {
@@ -89,7 +94,19 @@ export class UserController extends BaseController {
     this.ok(res, {});
   }
 
-  public async downloadAvatar(_req: Request, res: Response): Promise<void> {
-    this.ok(res, {});
+  public async downloadAvatar({params, file}: Request, res: Response): Promise<void> {
+    const {userId} = params;
+    if (file?.path) {
+      const user = await this.userService.findById(userId);
+      const oldAvatarPath = user?.avatar;
+      await this.userService.updateAvatarPath(userId, file.path);
+      if (oldAvatarPath) {
+        await fs.unlink(oldAvatarPath);
+      }
+      this.created(res, {
+        userId,
+        filepath: file.path
+      });
+    }
   }
 }

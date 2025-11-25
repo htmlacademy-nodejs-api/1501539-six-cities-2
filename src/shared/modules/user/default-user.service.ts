@@ -39,4 +39,12 @@ export class DefaultUserService implements UserService {
   public async exists(documentId: string): Promise<boolean> {
     return Boolean(await this.userModel.findById(documentId));
   }
+
+  public async updateAvatarPath(userId: string, avatarPath: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {avatar: avatarPath});
+  }
+
+  public async findById(userId: string): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel.findById(userId).exec();
+  }
 }
