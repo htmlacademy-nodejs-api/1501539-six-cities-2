@@ -16,6 +16,7 @@ import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { LoginUserDto } from './dto/login-user.dto.js';
 import { DocumentExistMiddleware } from '../../libs/rest/middleware/document-exist.middleware.js';
+import fs from 'node:fs/promises';
 
 enum UserPaths {
   Register = '/register',
@@ -93,9 +94,19 @@ export class UserController extends BaseController {
     this.ok(res, {});
   }
 
-  public async downloadAvatar(req: Request, res: Response): Promise<void> {
-    this.created(res, {
-      filepath: req.file?.path
-    });
+  public async downloadAvatar({params, file}: Request, res: Response): Promise<void> {
+    const {userId} = params;
+    if (file?.path) {
+      const user = await this.userService.findById(userId);
+      const oldAvatarPath = user?.avatar;
+      await this.userService.updateAvatarPath(userId, file.path);
+      if (oldAvatarPath) {
+        await fs.unlink(oldAvatarPath);
+      }
+      this.created(res, {
+        userId,
+        filepath: file.path
+      });
+    }
   }
 }
